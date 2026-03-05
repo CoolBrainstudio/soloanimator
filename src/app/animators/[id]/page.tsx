@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, Instagram, ExternalLink, Calendar, DollarSign, Star } from 'lucide-react';
 import { Animator } from '@/types';
+import { supabase } from '@/lib/supabase';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -15,21 +16,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-const sampleAnimator: Animator = {
-  id: '1',
-  name: 'Alex Chen',
-  email: 'alex@example.com',
-  instagram: 'alexanimation',
-  portfolio: 'https://dribbble.com',
-  skills: ['2D Animation', 'Character Design', 'Motion Graphics', 'Storyboarding'],
-  experience: '5+ years',
-  price_range: '$500-$5000',
-  bio: 'Professional 2D animator specializing in character animation and motion graphics. I have worked with major brands and creative studios, bringing ideas to life through fluid and captivating animation. My passion lies in creating characters that tell stories through movement.',
-  status: 'approved',
-  featured: true,
-  created_at: '2026-01-01',
-};
-
 const sampleWorks = [
   { id: 1, title: 'Character Animation Reel', type: 'Video', url: '#' },
   { id: 2, title: 'Brand Campaign', type: 'Image', url: '#' },
@@ -39,7 +25,31 @@ const sampleWorks = [
 
 export default async function AnimatorProfilePage({ params }: Props) {
   const { id } = await params;
-  const animator = id === '1' ? sampleAnimator : { ...sampleAnimator, id };
+  
+  const { data: animator, error } = await supabase.client
+    .from('animators')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  console.log('Fetching animator:', id);
+  console.log('Animator data:', animator);
+  console.log('Error:', error);
+
+  if (!animator || error) {
+    return (
+      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Animator Not Found</h1>
+          <Link href="/animators" className="text-purple-400 hover:text-purple-300">
+            Back to Animators
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const displayAnimator = animator as Animator;
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] animate-fadeIn">
@@ -60,17 +70,17 @@ export default async function AnimatorProfilePage({ params }: Props) {
               <div className="flex items-end gap-4">
                 <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-purple-500 to-cyan-500 border-4 border-[#1a1a1a] flex-shrink-0">
                   <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-white">
-                    {animator.name.charAt(0).toUpperCase()}
+                    {displayAnimator.name?.charAt(0).toUpperCase() || 'A'}
                   </div>
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h1 className="text-2xl font-bold text-white">{animator.name}</h1>
-                    {animator.featured && (
+                    <h1 className="text-2xl font-bold text-white">{displayAnimator.name}</h1>
+                    {displayAnimator.featured && (
                       <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                     )}
                   </div>
-                  <p className="text-gray-400">{animator.experience} Experience</p>
+                  <p className="text-gray-400">{displayAnimator.experience || 'N/A'} Experience</p>
                 </div>
               </div>
               
@@ -83,7 +93,7 @@ export default async function AnimatorProfilePage({ params }: Props) {
             </div>
 
             <div className="flex flex-wrap gap-2 mb-6">
-              {animator.skills.map((skill) => (
+              {displayAnimator.skills?.map((skill: string) => (
                 <span
                   key={skill}
                   className="px-3 py-1.5 text-sm rounded-full bg-purple-500/20 text-purple-400"
@@ -98,7 +108,7 @@ export default async function AnimatorProfilePage({ params }: Props) {
                 <DollarSign className="w-5 h-5 text-green-400" />
                 <div>
                   <p className="text-xs text-gray-500">Price Range</p>
-                  <p className="text-white font-medium">{animator.price_range || 'Negotiable'}</p>
+                  <p className="text-white font-medium">{displayAnimator.price_range || 'Negotiable'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 rounded-lg bg-white/5">
@@ -106,10 +116,10 @@ export default async function AnimatorProfilePage({ params }: Props) {
                 <div>
                   <p className="text-xs text-gray-500">Member Since</p>
                   <p className="text-white font-medium">
-                    {new Date(animator.created_at).toLocaleDateString('en-US', {
+                    {displayAnimator.created_at ? new Date(displayAnimator.created_at).toLocaleDateString('en-US', {
                       month: 'short',
                       year: 'numeric'
-                    })}
+                    }) : 'N/A'}
                   </p>
                 </div>
               </div>
@@ -119,20 +129,20 @@ export default async function AnimatorProfilePage({ params }: Props) {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Status</p>
-                  <p className="text-white font-medium capitalize">{animator.status}</p>
+                  <p className="text-white font-medium capitalize">{displayAnimator.status}</p>
                 </div>
               </div>
             </div>
 
             <div className="mb-8">
               <h2 className="text-lg font-semibold text-white mb-3">About</h2>
-              <p className="text-gray-300 leading-relaxed">{animator.bio}</p>
+              <p className="text-gray-300 leading-relaxed">{displayAnimator.bio}</p>
             </div>
 
             <div className="flex gap-4 mb-8">
-              {animator.instagram && (
+              {displayAnimator.instagram && (
                 <a
-                  href={`https://instagram.com/${animator.instagram}`}
+                  href={`https://instagram.com/${displayAnimator.instagram}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pink-500/20 hover:bg-pink-500/30 text-pink-400 transition-colors"
@@ -141,9 +151,9 @@ export default async function AnimatorProfilePage({ params }: Props) {
                   Instagram
                 </a>
               )}
-              {animator.portfolio && (
+              {displayAnimator.portfolio && (
                 <a
-                  href={animator.portfolio}
+                  href={displayAnimator.portfolio}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 transition-colors"
@@ -172,7 +182,7 @@ export default async function AnimatorProfilePage({ params }: Props) {
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-gray-400 mb-4">Ready to work with {animator.name}?</p>
+          <p className="text-gray-400 mb-4">Ready to work with {displayAnimator.name}?</p>
           <Link
             href="/hire"
             className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-semibold transition-all duration-300 hover:scale-105"

@@ -1,127 +1,176 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Play, ArrowRight, Sparkles, Users, Briefcase } from 'lucide-react';
-import EpisodeCard from '@/components/EpisodeCard';
-import { Episode } from '@/types';
+import { ArrowRight, Sparkles, Users, Briefcase, Instagram, ExternalLink, Plus } from 'lucide-react';
+import { Animator } from '@/types';
+import { supabase } from '@/lib/supabase';
 
-const featuredEpisode: Episode = {
-  id: '1',
-  title: 'The Beginning - Episode 1',
-  description: 'Watch the first episode of our flagship series. Join our heroes as they embark on an epic journey that will change everything.',
-  thumbnail: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&h=675&fit=crop',
-  video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-  video_type: 'youtube',
-  duration: '12:30',
-  release_date: '2026-01-15',
-  published: true,
-  created_at: '2026-01-15',
-};
+function AnimatorCard({ animator }: { animator: Animator }) {
+  const avatarColors = [
+    'from-purple-500 to-pink-500',
+    'from-blue-500 to-cyan-500',
+    'from-green-500 to-emerald-500',
+    'from-orange-500 to-yellow-500',
+    'from-red-500 to-pink-500',
+    'from-indigo-500 to-purple-500',
+  ];
+  
+  const colorIndex = parseInt(animator.id?.slice(-1) || '0') % avatarColors.length;
 
-const sampleEpisodes: Episode[] = [
-  {
-    id: '2',
-    title: 'New Horizons - Episode 2',
-    description: 'The adventure continues as new challenges arise.',
-    thumbnail: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&h=450&fit=crop',
-    video_url: 'https://www.youtube.com/watch?v=example',
-    video_type: 'youtube',
-    duration: '10:15',
-    release_date: '2026-02-01',
-    published: true,
-    created_at: '2026-02-01',
-  },
-  {
-    id: '3',
-    title: 'Echoes of Tomorrow',
-    description: 'A short animation exploring futuristic themes.',
-    thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=450&fit=crop',
-    video_url: 'https://www.youtube.com/watch?v=example2',
-    video_type: 'youtube',
-    duration: '8:45',
-    release_date: '2026-02-15',
-    published: true,
-    created_at: '2026-02-15',
-  },
-  {
-    id: '4',
-    title: 'The Last Star',
-    description: 'An emotional story about hope and perseverance.',
-    thumbnail: 'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=800&h=450&fit=crop',
-    video_url: 'https://www.youtube.com/watch?v=example3',
-    video_type: 'youtube',
-    duration: '15:00',
-    release_date: '2026-03-01',
-    published: true,
-    created_at: '2026-03-01',
-  },
-  {
-    id: '5',
-    title: 'Digital Dreams',
-    description: 'Animation meets technology in this visual masterpiece.',
-    thumbnail: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&h=450&fit=crop',
-    video_url: 'https://www.youtube.com/watch?v=example4',
-    video_type: 'youtube',
-    duration: '11:20',
-    release_date: '2026-03-15',
-    published: true,
-    created_at: '2026-03-15',
-  },
-  {
-    id: '6',
-    title: 'Colors of Life',
-    description: 'A vibrant journey through emotion and color.',
-    thumbnail: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=800&h=450&fit=crop',
-    video_url: 'https://www.youtube.com/watch?v=example5',
-    video_type: 'youtube',
-    duration: '9:30',
-    release_date: '2026-04-01',
-    published: true,
-    created_at: '2026-04-01',
-  },
-];
+  return (
+    <div className="glass-card p-6 hover:neon-glow transition-all duration-300">
+      {animator.portfolio_image && (
+        <div className="relative h-32 mb-4 rounded-lg overflow-hidden">
+          <Image
+            src={animator.portfolio_image}
+            alt="Portfolio"
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
+      <div className="flex items-start gap-4">
+        <div className={`relative w-16 h-16 rounded-full bg-gradient-to-br ${avatarColors[colorIndex]} flex-shrink-0 flex items-center justify-center`}>
+          <span className="text-xl font-bold text-white">
+            {animator.name?.charAt(0) || 'A'}
+          </span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-white truncate">{animator.name}</h3>
+          <p className="text-purple-400 text-sm">{animator.skills?.[0] || 'Animator'}</p>
+        </div>
+      </div>
+
+      <p className="text-gray-400 text-sm mt-3 line-clamp-2">
+        {animator.bio}
+      </p>
+
+      <div className="flex items-center gap-3 mt-3">
+        {animator.instagram && (
+          <a
+            href={`https://instagram.com/${animator.instagram}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          >
+            <Instagram className="w-4 h-4 text-pink-400" />
+          </a>
+        )}
+        {animator.portfolio && (
+          <a
+            href={animator.portfolio}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          >
+            <ExternalLink className="w-4 h-4 text-cyan-400" />
+          </a>
+        )}
+      </div>
+
+      <Link
+        href={`/animators/${animator.id}`}
+        className="block mt-4 w-full py-2 text-center rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors"
+      >
+        View Profile
+      </Link>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="text-center py-16">
+      <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+        <Users className="w-10 h-10 text-purple-400" />
+      </div>
+      <h3 className="text-2xl font-bold text-white mb-3">No Animators Yet</h3>
+      <p className="text-gray-400 mb-6 max-w-md mx-auto">
+        Be one of the first animators to join the SoloAnimator Network and showcase your skills.
+      </p>
+      <Link
+        href="/animators/register"
+        className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-semibold transition-all duration-300 hover:scale-105"
+      >
+        <Plus className="w-5 h-5" />
+        Join as an Animator
+      </Link>
+    </div>
+  );
+}
 
 export default function Home() {
+  const [animators, setAnimators] = useState<Animator[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnimators = async () => {
+      try {
+        const { data, error } = await supabase.client
+          .from('animators')
+          .select('*')
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false })
+          .limit(6);
+
+        console.log('Fetched featured animators:', data);
+        console.log('Error:', error);
+
+        if (data && !error) {
+          setAnimators(data);
+        }
+      } catch (err) {
+        console.error('Error fetching animators:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnimators();
+  }, []);
+
   return (
     <div className="animate-fadeIn">
-      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
-            src={featuredEpisode.thumbnail}
-            alt="Featured"
+            src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1920&h=1080&fit=crop"
+            alt="Background"
             fill
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0f0f0f] via-[#0f0f0f]/90 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0f0f0f] via-[#0f0f0f]/95 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0f0f0f] via-transparent to-transparent" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="max-w-2xl">
+          <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 text-sm mb-4">
               <Sparkles className="w-4 h-4" />
-              Featured Series
+              Curated Animator Network
             </span>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
-              {featuredEpisode.title}
+              Discover and Hire Talented Animators
             </h1>
             <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-              {featuredEpisode.description}
+              A curated network of independent animators ready to bring your ideas to life.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
-                href={`/series/${featuredEpisode.id}`}
+                href="/animators"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-semibold transition-all duration-300 hover:scale-105 animate-pulse-glow"
               >
-                <Play className="w-5 h-5" fill="currentColor" />
-                Watch Now
+                Browse Animators
+                <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
-                href="/animators"
+                href="/hire"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-full font-semibold transition-all duration-300"
               >
-                View Animators
-                <ArrowRight className="w-5 h-5" />
+                Hire an Animator
               </Link>
             </div>
           </div>
@@ -130,33 +179,36 @@ export default function Home() {
 
       <section className="py-20 bg-[#0f0f0f]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="text-3xl font-bold text-white">Latest Episodes</h2>
-              <p className="text-gray-400 mt-2">Fresh content from our creative network</p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white">Featured Animators</h2>
+            <p className="text-gray-400 mt-2">Top talent from our curated network</p>
+          </div>
+          
+          {loading ? (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 mx-auto rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
             </div>
-            <Link
-              href="/series"
-              className="hidden md:inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors"
-            >
-              View All <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sampleEpisodes.map((episode) => (
-              <EpisodeCard key={episode.id} episode={episode} />
-            ))}
-          </div>
-
-          <div className="mt-8 text-center md:hidden">
-            <Link
-              href="/series"
-              className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors"
-            >
-              View All Episodes <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+          ) : animators.length === 0 ? (
+            <EmptyState />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {animators.map((animator) => (
+                <AnimatorCard key={animator.id} animator={animator} />
+              ))}
+            </div>
+          )}
+          
+          {animators.length > 0 && (
+            <div className="text-center mt-8">
+              <Link
+                href="/animators"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+              >
+                View All Animators
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
@@ -165,31 +217,31 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="glass-card p-8 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-500/20 flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-purple-400" />
+                <Users className="w-8 h-8 text-purple-400" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Stream Original Series</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">Discover Talent</h3>
               <p className="text-gray-400">
-                Watch exclusive short animation series from talented creators worldwide
+                Browse profiles of verified animators and find the perfect match for your project
               </p>
             </div>
 
             <div className="glass-card p-8 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                <Users className="w-8 h-8 text-cyan-400" />
+                <Briefcase className="w-8 h-8 text-cyan-400" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Connect with Animators</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">Hire Easily</h3>
               <p className="text-gray-400">
-                Discover and network with verified talented animators in our community
+                Submit your project requirements and get matched with skilled animators
               </p>
             </div>
 
             <div className="glass-card p-8 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-pink-500/20 flex items-center justify-center">
-                <Briefcase className="w-8 h-8 text-pink-400" />
+                <Sparkles className="w-8 h-8 text-pink-400" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Hire Talent</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">Quality Guaranteed</h3>
               <p className="text-gray-400">
-                Submit your animation project requirements and get matched with the perfect animator
+                Work with pre-vetted animators who deliver professional results
               </p>
             </div>
           </div>
@@ -202,8 +254,8 @@ export default function Home() {
             Ready to Bring Your Vision to Life?
           </h2>
           <p className="text-xl text-gray-400 mb-8">
-            Whether you want to watch amazing animations or hire talented animators, 
-            SoloAnimator Network has you covered.
+            Whether you need character animation, motion graphics, or explainer videos, 
+            our network of talented animators is ready to help.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
@@ -213,7 +265,7 @@ export default function Home() {
               Hire an Animator
             </Link>
             <Link
-              href="/animators"
+              href="/animators/register"
               className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-full font-semibold transition-all duration-300"
             >
               Join as Animator

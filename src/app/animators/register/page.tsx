@@ -10,6 +10,7 @@ interface FormData {
   email: string;
   instagram: string;
   portfolio: string;
+  portfolio_image: string;
   skills: string;
   experience: string;
   price_range: string;
@@ -26,10 +27,6 @@ const experienceOptions = [
   'Less than 1 year', '1-2 years', '2-3 years', '3-5 years', '5+ years'
 ];
 
-const priceRanges = [
-  'Under $500', '$500-$1000', '$1000-$2500', '$2500-$5000', '$5000+', 'Negotiable'
-];
-
 export default function RegisterAnimatorPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,6 +37,7 @@ export default function RegisterAnimatorPage() {
     email: '',
     instagram: '',
     portfolio: '',
+    portfolio_image: '',
     skills: '',
     experience: '',
     price_range: '',
@@ -64,6 +62,7 @@ export default function RegisterAnimatorPage() {
           email: formData.email,
           instagram: formData.instagram,
           portfolio: formData.portfolio,
+          portfolio_image: formData.portfolio_image,
           skills: formData.skills,
           experience: formData.experience,
           price_range: formData.price_range,
@@ -201,6 +200,21 @@ export default function RegisterAnimatorPage() {
                   placeholder="https://dribbble.com/yourname"
                 />
               </div>
+
+              <div>
+                <label htmlFor="portfolio_image" className="block text-sm font-medium text-gray-300 mb-2">
+                  Portfolio Preview Image (Optional)
+                </label>
+                <input
+                  type="url"
+                  id="portfolio_image"
+                  name="portfolio_image"
+                  value={formData.portfolio_image}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+                  placeholder="https://example.com/your-work.jpg"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -245,18 +259,15 @@ export default function RegisterAnimatorPage() {
               <label htmlFor="price_range" className="block text-sm font-medium text-gray-300 mb-2">
                 Price Range
               </label>
-              <select
+              <input
+                type="text"
                 id="price_range"
                 name="price_range"
                 value={formData.price_range}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-purple-500 transition-colors"
-              >
-                <option value="" className="bg-gray-900">Select price range</option>
-                {priceRanges.map(price => (
-                  <option key={price} value={price} className="bg-gray-900">{price}</option>
-                ))}
-              </select>
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+                placeholder="e.g., $50 - $200 per animation or Negotiable"
+              />
             </div>
 
             <div>

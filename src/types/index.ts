@@ -11,6 +11,7 @@ export interface Animator {
   status: 'pending' | 'approved' | 'rejected';
   featured: boolean;
   created_at: string;
+  portfolio_image?: string;
 }
 
 export interface Episode {

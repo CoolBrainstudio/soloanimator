@@ -26,8 +26,7 @@ export default function Footer() {
               <span className="text-xl font-bold text-white">SoloAnimator</span>
             </Link>
             <p className="text-gray-400 mb-4 max-w-md">
-              Watch. Connect. Create. A niche animation ecosystem where original 
-              short animation series come to life and talented animators showcase their skills.
+              SoloAnimator is a curated network of independent animators where creators and businesses can discover talented artists for animation projects.
             </p>
             <div className="flex gap-4">
               <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors">

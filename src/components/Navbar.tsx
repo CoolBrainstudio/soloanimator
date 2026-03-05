@@ -36,12 +36,6 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/admin"
-              className="text-gray-500 hover:text-gray-400 text-sm transition-colors"
-            >
-              Admin
-            </Link>
           </div>
 
           <button
@@ -66,13 +60,6 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/admin"
-              className="block text-gray-500 hover:text-gray-400 py-2 text-sm"
-              onClick={() => setIsOpen(false)}
-            >
-              Admin
-            </Link>
           </div>
         </div>
       )}

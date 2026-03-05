@@ -10,11 +10,6 @@ const animationTypes = [
   'Motion Graphics', 'Stop Motion', 'Other'
 ];
 
-const budgetRanges = [
-  'Under $500', '$500 - $1000', '$1000 - $2500', '$2500 - $5000',
-  '$5000 - $10000', '$10000+', 'Not Sure / Negotiable'
-];
-
 const deadlines = [
   'ASAP (Urgent)', 'Within 1 week', 'Within 2 weeks', 'Within 1 month',
   'Within 3 months', 'Flexible / No strict deadline'
@@ -212,21 +207,18 @@ export default function HirePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="budget" className="block text-sm font-medium text-gray-300 mb-2">
-                  Budget Range *
+                  Project Budget *
                 </label>
-                <select
+                <input
+                  type="text"
                   id="budget"
                   name="budget"
                   required
                   value={formData.budget}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-purple-500 transition-colors"
-                >
-                  <option value="" className="bg-gray-900">Select budget</option>
-                  {budgetRanges.map(budget => (
-                    <option key={budget} value={budget} className="bg-gray-900">{budget}</option>
-                  ))}
-                </select>
+                  className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+                  placeholder="e.g., $1000 budget for YouTube animation"
+                />
               </div>
 
               <div>
